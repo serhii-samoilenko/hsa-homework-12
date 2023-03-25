@@ -1,2 +1,3 @@
-greeting:
-  message: "hello"
+app:
+  entity-count: 1000
+  prepopulate-percentage: 75
