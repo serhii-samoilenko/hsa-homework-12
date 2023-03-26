@@ -1,0 +1,20 @@
+# Configuration file version
+apiVersion: 1
+
+# Redis data source
+datasources:
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    isDefault: false
+    orgId: 1
+    version: 1
+    url: redis://redis-sentinel-1:26379,redis://redis-sentinel-1:26380,redis://redis-sentinel-1:26381
+    jsonData:
+      client: sentinel
+      sentinelName: mymaster
+      poolSize: 5
+      timeout: 10
+      pingInterval: 0
+      pipelineWindow: 0
+    editable: true
