@@ -23,11 +23,11 @@ data class Person(
         fun generateRandom(firstName: String, lastName: String) = Person(
             firstName = firstName,
             lastName = lastName,
-            data = randomText(
+            data = ""/* randomText(
                 paragraphs = Random.nextInt(3, 4),
                 sentences = Random.nextInt(5, 10),
                 words = Random.nextInt(11, 17),
-            ),
+            ),*/
         )
 
         private fun randomName(length: Int) = RandomStringUtils.randomAlphabetic(length)

@@ -6,7 +6,7 @@ import io.quarkus.redis.datasource.value.ValueCommands
 import javax.inject.Singleton
 
 @Singleton
-class PersonCache(redisDataSource: RedisDataSource) {
+class PersonCache(private val redisDataSource: RedisDataSource) {
     private val commands: ValueCommands<String, Person> = redisDataSource.value(Person::class.java)
 
     operator fun get(key: String): Person? {
@@ -20,5 +20,9 @@ class PersonCache(redisDataSource: RedisDataSource) {
 
     fun persist(personList: List<Person>) {
         commands.mset(personList.associateBy { it.id })
+    }
+
+    fun drop() {
+        redisDataSource.flushall()
     }
 }

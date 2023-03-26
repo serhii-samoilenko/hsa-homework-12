@@ -23,6 +23,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.quarkus:quarkus-arc")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("io.quarkiverse.micrometer.registry:quarkus-micrometer-registry-statsd:2.12.0")
     implementation("org.apache.commons:commons-lang3")
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")

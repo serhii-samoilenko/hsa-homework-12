@@ -1,16 +1,19 @@
 quarkus:
   redis:
     hosts: redis://localhost:6379
+    max-pool-size: 10
+    max-pool-waiting: 11
 #    ,redis://localhost:26380,redis://localhost:26381
 #    client-type: sentinel
 #    sentinel:
 #      master-name: mymaster
-#    timeout: 10000
+    timeout: 10000
   log:
     category:
       io.quarkus:
         level: INFO
 
 app:
-  entity-count: 1000
+  entity-count: 500
   prepopulate-percentage: 75
+  generation-delay: 10ms
