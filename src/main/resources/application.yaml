@@ -8,6 +8,11 @@ quarkus:
 #    sentinel:
 #      master-name: mymaster
     timeout: 10000
+  vertx:
+    worker-pool-size: 128
+    event-loops-pool-size: 128
+  http:
+    io-threads: 128
   log:
     category:
       io.quarkus:
@@ -16,4 +21,4 @@ quarkus:
 app:
   entity-count: 500
   prepopulate-percentage: 75
-  generation-delay: 10ms
+  generation-delay: 50ms

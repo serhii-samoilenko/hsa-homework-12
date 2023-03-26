@@ -41,14 +41,14 @@ class PersonService(
     @Counted(value = "lookup_count", extraTags = ["method", "getPerson"])
     fun getPerson(firstName: String, lastName: String): Person {
         val key = "$firstName $lastName"
-//        val cachedPerson = personCache[key]
-//        if (cachedPerson != null) {
-//            hitsCounter.increment()
-//            return cachedPerson
-//        }
-//        misesCounter.increment()
-        val person = Person.generateRandom(firstName, lastName)
-//        personCache[key] = person
+        val cachedPerson = personCache[key]
+        if (cachedPerson != null) {
+            hitsCounter.increment()
+            return cachedPerson
+        }
+        misesCounter.increment()
+        val person = generatePersonSlowly(firstName, lastName)
+        personCache[key] = person
         return person
     }
 

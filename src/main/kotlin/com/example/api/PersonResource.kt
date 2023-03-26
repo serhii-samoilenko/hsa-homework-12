@@ -2,6 +2,7 @@ package com.example.api
 
 import com.example.service.PersonService
 import io.micrometer.core.annotation.Counted
+import io.smallrye.common.annotation.Blocking
 import javax.enterprise.context.ApplicationScoped
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -18,6 +19,7 @@ class PersonResource(private val personService: PersonService) {
     @GET
     @Produces(APPLICATION_JSON)
     @Counted(value = "get_count", extraTags = ["method", "getPerson"])
+    @Blocking
     fun getPerson(
         @QueryParam("firstName") firstName: String,
         @QueryParam("lastName") lastName: String,
@@ -30,6 +32,7 @@ class PersonResource(private val personService: PersonService) {
     @Path("/random")
     @Produces(APPLICATION_JSON)
     @Counted(value = "random_count", extraTags = ["method", "getRandomPerson"])
+    @Blocking
     fun getRandomPerson(
         @QueryParam("skew") skew: Double?,
     ): Response {
@@ -45,6 +48,7 @@ class PersonResource(private val personService: PersonService) {
     @Path("/wtf")
     @Produces(TEXT_PLAIN)
     @Counted(value = "wtf_count", extraTags = ["method", "getWtf"])
+    @Blocking
     fun getWtf(): Response {
         return Response.ok("OK").build()
     }

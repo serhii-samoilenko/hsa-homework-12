@@ -5,7 +5,7 @@ services:
   redis-master:
     image: redis:7-alpine
     container_name: redis-master
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --save "" --appendonly no
     ports:
       - '6379:6379'
 
