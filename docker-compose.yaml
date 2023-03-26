@@ -2,22 +2,32 @@ version: '3.9'
 
 services:
 
-  elasticsearch:
-    image: elasticsearch:7.17.9
-    container_name: elasticsearch
-    restart: always
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms256m -Xmx512m
-      - http.port=9200
+  redis-master:
+    image: redis:7-alpine
+    container_name: redis-master
+    command: redis-server
     ports:
-      - '9200:9200'
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
-      interval: 5s
-      timeout: 5s
-      retries: 25
+      - '6379:6379'
+
+  redis-slave:
+    image: redis:7-alpine
+    container_name: redis-slave
+    command: redis-server --slaveof redis-master 6379
+    ports:
+      - '6380:6379'
+    depends_on:
+      - redis-master
+
+  redis-sentinel:
+    image: redis:7-alpine
+    volumes:
+      - ./config/redis-sentinel/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf --sentinel
+    depends_on:
+      - redis-master
+      - redis-slave
+    ports:
+      - '26379-26381:26379'
 
   socket-proxy:
     image: tecnativa/docker-socket-proxy
@@ -89,6 +99,6 @@ services:
   siege:
     image: jstarcher/siege
     container_name: siege
-    depends_on:
-      - nginx
+    profiles:
+      - siege
     command: -c 10 -t 30m http://nginx:8080/root/xor/random

@@ -1,6 +1,6 @@
 package com.example.api
 
-import com.example.service.PersonGeneratorService
+import com.example.service.PersonService
 import javax.enterprise.context.ApplicationScoped
 import javax.ws.rs.GET
 import javax.ws.rs.Path
@@ -11,9 +11,7 @@ import javax.ws.rs.core.Response
 
 @ApplicationScoped
 @Path("/person")
-class PersonResource(
-    private val personGeneratorService: PersonGeneratorService,
-) {
+class PersonResource(private val personService: PersonService) {
 
     @GET
     @Produces(APPLICATION_JSON)
@@ -21,7 +19,7 @@ class PersonResource(
         @QueryParam("firstName") firstName: String,
         @QueryParam("lastName") lastName: String,
     ): Response {
-        val entity = personGeneratorService.generatePerson(firstName, lastName)
+        val entity = personService.getPerson(firstName, lastName)
         return Response.ok(entity).build()
     }
 
@@ -29,7 +27,7 @@ class PersonResource(
     @Path("/random")
     @Produces(APPLICATION_JSON)
     fun getRandomPerson(): Response {
-        val entity = personGeneratorService.generatePerson()
+        val entity = personService.getRandomPerson()
         return Response.ok(entity).build()
     }
 }
