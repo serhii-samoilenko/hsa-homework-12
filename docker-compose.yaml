@@ -29,27 +29,12 @@ services:
     ports:
       - '26379:26379'
 
-  socket-proxy:
-    image: tecnativa/docker-socket-proxy
-    container_name: socket-proxy
-    restart: always
-    privileged: true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - '127.0.0.1:2375:2375'
-    environment:
-      - LOG_LEVEL=warning # debug,info,notice,warning,err,crit,alert,emerg
-      - CONTAINERS=1
-      - INFO=1
-
   telegraf:
     image: telegraf:alpine
     container_name: telegraf
     restart: always
     volumes:
       - ./config/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - '8125:8125/udp'
     depends_on:

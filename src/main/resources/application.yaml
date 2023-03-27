@@ -19,6 +19,6 @@ quarkus:
         level: INFO
 
 app:
-  entity-count: 500
+  entity-count: 50000
   prepopulate-percentage: 75
-  generation-delay: 50ms
+  generation-delay: 100ms
