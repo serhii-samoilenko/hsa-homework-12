@@ -3,94 +3,97 @@ package com.example.service
 import com.example.config.AppConfig
 import com.example.model.Person
 import io.micrometer.core.annotation.Counted
-import io.micrometer.core.annotation.Timed
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Metrics.counter
 import io.quarkus.logging.Log
 import io.quarkus.runtime.Startup
-import org.apache.commons.lang3.RandomStringUtils
+import io.smallrye.mutiny.Uni
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
-import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.time.Duration
 
-@Suppress("UnstableApiUsage")
 @Startup
 @ApplicationScoped
 class PersonService(
     private val config: AppConfig,
     private val personCache: PersonCache,
-    private val registry: MeterRegistry,
+    registry: MeterRegistry,
 ) {
-    private val firstNamesCount = sqrt(config.entityCount().toDouble()).toInt()
-    private val lastNamesCount = firstNamesCount
-    private val firstNames: List<String>
-    private val lastNames: List<String>
+    private val entityIds: IntRange = (0 until config.entityGroupSizes().sum())
     private val generationDelayMs = Duration.parse(config.generationDelay()).inWholeMilliseconds
+    private val entityGroups = getEntityGroups(config.entityGroupSizes(), config.entityGroupProbabilities())
     private val hitsCounter = registry.counter("hit_count")
     private val misesCounter = registry.counter("miss_count")
 
-    init {
-        Log.info("Creating pool of $firstNamesCount first names and $lastNamesCount last names")
-        firstNames = (1..firstNamesCount).map { randomName(19) }.toList()
-        lastNames = (1..lastNamesCount).map { randomName(20) }.toList()
-    }
+    @Counted(value = "lookup_count")
+    fun getPerson(key: String): Uni<Person> =
+        personCache.get(key)
+            .chain { cached ->
+                if (cached != null) {
+                    hitsCounter.increment()
+                    Uni.createFrom().item(cached)
+                } else {
+                    misesCounter.increment()
+                    val person = generatePersonSlowly(key)
+                    personCache.set(key, person).chain { _ ->
+                        Uni.createFrom().item(person)
+                    }
+                }
+            }
 
-    @Timed(value = "lookup_time", extraTags = ["method", "getPerson"])
-    @Counted(value = "lookup_count", extraTags = ["method", "getPerson"])
-    fun getPerson(firstName: String, lastName: String): Person {
-        val key = "$firstName $lastName"
-        val cachedPerson = personCache[key]
-        if (cachedPerson != null) {
-            hitsCounter.increment()
-            return cachedPerson
-        }
-        misesCounter.increment()
-        val person = generatePersonSlowly(firstName, lastName)
-        personCache[key] = person
-        return person
-    }
+    fun getUniformRandomPerson() = getPerson(randomId().toString())
 
-    fun getUniformRandomPerson() = getPerson(firstNames.random(), lastNames.random())
+    fun getProbablyDistributedRandomPerson() = getPerson(probablyDistributedRandomId().toString())
 
-    fun getSkewedRandomPerson(skew: Double) = getPerson(firstNames.skewedRandom(skew), lastNames.skewedRandom(skew))
-
-    internal fun generatePersonSlowly(firstName: String, lastName: String): Person {
+    private fun generatePersonSlowly(id: String): Person {
         Thread.sleep(generationDelayMs)
-        return Person.generateRandom(firstName, lastName)
+        return Person.generateRandom(id)
     }
 
     @PostConstruct
     fun init() {
         Log.info(
             "Pre-populating cache with around ${config.prepopulatePercentage()}% of total" +
-                " ${firstNames.size} first names and ${lastNames.size} last names",
+                " ${entityIds.count()} entities",
         )
-        personCache.drop()
+        personCache.drop().await().indefinitely()
         val batchSize = 1000
         // Save random persons to Redis
-        val count: Int = (firstNamesCount * lastNamesCount * config.prepopulatePercentage() / 100)
-        (1..count)
+        entityIds
             .asSequence()
-            .map { Person.generateRandom(firstName = firstNames.random(), lastName = lastNames.random()) }
+            .filter { Random.nextInt(0, 100) < config.prepopulatePercentage() }
+            .map { Person.generateRandom(it.toString()) }
             .chunked(batchSize)
             .forEach { personList ->
                 Log.info("Persisting ${personList.size} persons")
-                personCache.persist(personList)
+                personCache.persist(personList).await().indefinitely()
             }
     }
 
-    companion object {
-        private fun randomName(length: Int) = RandomStringUtils.randomAlphabetic(length, length + 2)
+    private fun randomId(): Int {
+        return Random.nextInt(entityIds.count())
     }
-}
 
-private fun <E> List<E>.skewedRandom(skew: Double): E {
-    if (size == 1) return first()
-    val midpoint = (size * skew).toInt()
-    return when (Random.nextBoolean()) {
-        true -> get(Random.nextInt(midpoint))
-        false -> get(midpoint + Random.nextInt(size - midpoint))
+    private fun probablyDistributedRandomId(): Int {
+        val randomValue: Double = Random.nextDouble()
+        var cumulativeProbability = 0.0
+        entityGroups.forEach {
+            cumulativeProbability += it.second
+            if (randomValue <= cumulativeProbability) {
+                return it.first.random()
+            }
+        }
+        return entityIds.random()
+    }
+
+    companion object {
+        private fun getEntityGroups(sizes: IntArray, probabilities: List<Double>): List<Pair<IntRange, Double>> {
+            var start = 0
+            return sizes.map { size ->
+                val range = start until (start + size)
+                start += size
+                range
+            }.zip(probabilities)
+        }
     }
 }

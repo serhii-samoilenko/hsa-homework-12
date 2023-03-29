@@ -2,31 +2,27 @@ package com.example.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.apache.commons.lang3.RandomStringUtils
-import kotlin.random.Random
 
 data class Person(
+    @JsonProperty("id")
+    val id: String,
     @JsonProperty("first_name")
     val firstName: String,
     @JsonProperty("last_name")
     val lastName: String,
-    @JsonProperty("id")
-    val id: String = "$firstName $lastName",
     @JsonProperty("data")
     val data: String,
 ) {
     companion object {
-        fun generateRandom() = generateRandom(
+
+        fun generateRandom(id: String) = Person(
+            id = id,
             firstName = randomName(19),
             lastName = randomName(20),
-        )
-
-        fun generateRandom(firstName: String, lastName: String) = Person(
-            firstName = firstName,
-            lastName = lastName,
             data = randomText(
-                paragraphs = Random.nextInt(3, 4),
-                sentences = Random.nextInt(5, 10),
-                words = Random.nextInt(11, 17),
+                paragraphs = 5,
+                sentences = 5,
+                words = 10,
             ),
         )
 

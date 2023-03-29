@@ -1,28 +1,28 @@
 package com.example.service
 
 import com.example.model.Person
-import io.quarkus.redis.datasource.RedisDataSource
-import io.quarkus.redis.datasource.value.ValueCommands
+import io.quarkus.redis.datasource.ReactiveRedisDataSource
+import io.quarkus.redis.datasource.value.ReactiveValueCommands
+import io.smallrye.mutiny.Uni
 import javax.inject.Singleton
 
 @Singleton
-class PersonCache(private val redisDataSource: RedisDataSource) {
-    private val commands: ValueCommands<String, Person> = redisDataSource.value(Person::class.java)
+class PersonCache(private val redisDataSource: ReactiveRedisDataSource) {
+    private val commands: ReactiveValueCommands<String, Person> = redisDataSource.value(String::class.java, Person::class.java)
 
-    operator fun get(key: String): Person? {
-        return commands[key]
+    fun get(key: String): Uni<Person> {
+        return commands.get(key)
     }
 
-    operator fun set(key: String, person: Person) {
-//        commands.setex(key, 1, person) // Expires after 1 second
-        commands.set(key, person)
+    fun set(key: String, person: Person): Uni<Void> {
+        return commands.set(key, person)
     }
 
-    fun persist(personList: List<Person>) {
-        commands.mset(personList.associateBy { it.id })
+    fun persist(personList: List<Person>): Uni<Void> {
+        return commands.mset(personList.associateBy { it.id })
     }
 
-    fun drop() {
-        redisDataSource.flushall()
+    fun drop(): Uni<Void> {
+        return redisDataSource.flushall()
     }
 }

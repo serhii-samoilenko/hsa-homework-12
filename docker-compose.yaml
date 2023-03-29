@@ -5,7 +5,7 @@ services:
   redis-master:
     image: redis:7-alpine
     container_name: redis-master
-    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru --save "" --appendonly no
     ports:
       - '6379:6379'
 
@@ -38,8 +38,6 @@ services:
     ports:
       - '8125:8125/udp'
     depends_on:
-      socket-proxy:
-        condition: service_started
       influxdb:
         condition: service_healthy
 
