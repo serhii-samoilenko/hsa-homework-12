@@ -2,8 +2,6 @@ package com.example.service
 
 import com.example.config.AppConfig
 import com.example.model.Person
-import io.micrometer.core.annotation.Counted
-import io.micrometer.core.instrument.MeterRegistry
 import io.quarkus.logging.Log
 import io.quarkus.runtime.Startup
 import io.smallrye.mutiny.Uni
@@ -17,33 +15,30 @@ import kotlin.time.Duration
 class PersonService(
     private val config: AppConfig,
     private val personCache: PersonCache,
-    registry: MeterRegistry,
+    private val cacheService: PersonCacheService,
 ) {
     private val entityIds: IntRange = (0 until config.entityGroupSizes().sum())
     private val generationDelayMs = Duration.parse(config.generationDelay()).inWholeMilliseconds
+    private val ttl = Duration.parse(config.cacheTtl()).inWholeMilliseconds
     private val entityGroups = getEntityGroups(config.entityGroupSizes(), config.entityGroupProbabilities())
-    private val hitsCounter = registry.counter("hit_count")
-    private val misesCounter = registry.counter("miss_count")
 
-    @Counted(value = "lookup_count")
-    fun getPerson(key: String): Uni<Person> =
-        personCache.get(key)
-            .chain { cached ->
-                if (cached != null) {
-                    hitsCounter.increment()
-                    Uni.createFrom().item(cached)
-                } else {
-                    misesCounter.increment()
-                    val person = generatePersonSlowly(key)
-                    personCache.set(key, person).chain { _ ->
-                        Uni.createFrom().item(person)
-                    }
-                }
-            }
+    fun getPerson(key: String): Uni<Person> {
+        return personCache.get(key)
+    }
 
-    fun getUniformRandomPerson() = getPerson(randomId().toString())
-
-    fun getProbablyDistributedRandomPerson() = getPerson(probablyDistributedRandomId().toString())
+    fun getRandomPerson(probablyDistributed: Boolean, useProbabilisticCache: Boolean): Uni<Person> {
+        val id = if (probablyDistributed) {
+            probablyDistributedRandomId().toString()
+        } else {
+            randomId().toString()
+        }
+        val supplier = { generatePersonSlowly(id) }
+        return if (useProbabilisticCache) {
+            cacheService.getOrComputeProbabilistic(id, ttl, supplier)
+        } else {
+            cacheService.getOrCompute(id, ttl, supplier)
+        }
+    }
 
     private fun generatePersonSlowly(id: String): Person {
         Thread.sleep(generationDelayMs)
@@ -56,7 +51,7 @@ class PersonService(
             "Pre-populating cache with around ${config.prepopulatePercentage()}% of total" +
                 " ${entityIds.count()} entities",
         )
-        personCache.drop().await().indefinitely()
+        personCache.drop()
         val batchSize = 1000
         // Save random persons to Redis
         entityIds
@@ -66,7 +61,7 @@ class PersonService(
             .chunked(batchSize)
             .forEach { personList ->
                 Log.info("Persisting ${personList.size} persons")
-                personCache.persist(personList).await().indefinitely()
+                personCache.persist(personList, ttl)
             }
     }
 

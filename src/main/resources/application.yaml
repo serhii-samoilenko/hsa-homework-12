@@ -1,16 +1,14 @@
 quarkus:
   redis:
     hosts: redis://localhost:6379
-#    max-pool-size: 128
-#    max-pool-waiting: 1024
 #    ,redis://localhost:26380,redis://localhost:26381
 #    client-type: sentinel
 #    sentinel:
 #      master-name: mymaster
     timeout: 10000
   vertx:
-#    worker-pool-size: 1024
-#    event-loops-pool-size: 1024
+    worker-pool-size: 32
+    event-loops-pool-size: 128
   http:
 #    io-threads: 1024
   log:
@@ -25,4 +23,6 @@ app:
   entity-group-sizes: "10000, 90000"
   entity-group-probabilities: "0.9, 0.1"
   prepopulate-percentage: 25
-  generation-delay: 100ms
+  generation-delay: 50ms
+  cache-ttl: 1h
+

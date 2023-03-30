@@ -27,11 +27,8 @@ class PersonResource(private val personService: PersonService) {
     @Produces(APPLICATION_JSON)
     fun getRandomPerson(
         @QueryParam("distributed") distributed: Boolean = false,
+        @QueryParam("probabilistic") probabilistic: Boolean = false,
     ): Uni<Person> {
-        return if (distributed) {
-            personService.getProbablyDistributedRandomPerson()
-        } else {
-            personService.getUniformRandomPerson()
-        }
+        return personService.getRandomPerson(probablyDistributed = distributed, useProbabilisticCache = probabilistic)
     }
 }

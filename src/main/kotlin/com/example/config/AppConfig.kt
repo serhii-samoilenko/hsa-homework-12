@@ -17,4 +17,7 @@ interface AppConfig {
 
     @WithName("generation-delay")
     fun generationDelay(): String
+
+    @WithName("cache-ttl")
+    fun cacheTtl(): String
 }

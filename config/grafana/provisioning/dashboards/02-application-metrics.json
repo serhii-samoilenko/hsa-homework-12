@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 19,
+  "id": 5,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -90,8 +90,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 10,
+        "h": 8,
+        "w": 8,
         "x": 0,
         "y": 0
       },
@@ -110,6 +110,7 @@
       },
       "targets": [
         {
+          "alias": "100-perc",
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb_db"
@@ -134,7 +135,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "time",
+          "measurement": "http_server_requests",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -152,6 +153,121 @@
                 "type": "mean"
               }
             ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "timing"
+            }
+          ]
+        },
+        {
+          "alias": "99-perc",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "endpoint"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "http_server_requests",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "99_percentile"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "timing"
+            }
+          ]
+        },
+        {
+          "alias": "90-perc",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "endpoint"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "http_server_requests",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "90_percentile"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "timing"
+            }
           ]
         }
       ],
@@ -220,9 +336,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 10,
+        "h": 8,
+        "w": 8,
+        "x": 8,
         "y": 0
       },
       "id": 2,
@@ -240,7 +356,6 @@
       },
       "targets": [
         {
-          "alias": "lookup ms",
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb_db"
@@ -259,7 +374,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "time",
+          "measurement": "hit_count",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -268,7 +383,7 @@
             [
               {
                 "params": [
-                  "100_percentile"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -280,20 +395,13 @@
           ],
           "tags": [
             {
-              "key": "application",
+              "key": "metric_type",
               "operator": "=",
-              "value": "root-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "lookup"
+              "value": "counter"
             }
           ]
         },
         {
-          "alias": "update ms",
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb_db"
@@ -313,7 +421,7 @@
             }
           ],
           "hide": false,
-          "measurement": "time",
+          "measurement": "hit_count",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -322,32 +430,32 @@
             [
               {
                 "params": [
-                  "100_percentile"
+                  "value"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
                 "type": "mean"
+              },
+              {
+                "params": [
+                  10
+                ],
+                "type": "moving_average"
               }
             ]
           ],
           "tags": [
             {
-              "key": "application",
+              "key": "metric_type",
               "operator": "=",
-              "value": "root-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "update"
+              "value": "counter"
             }
           ]
         }
       ],
-      "title": "root-service cache latency",
+      "title": "Service cache Hits",
       "type": "timeseries"
     },
     {
@@ -384,7 +492,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": 20000,
             "stacking": {
               "group": "A",
@@ -412,12 +520,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 17,
+        "h": 8,
+        "w": 8,
+        "x": 16,
         "y": 0
       },
-      "id": 5,
+      "id": 13,
       "options": {
         "legend": {
           "calcs": [],
@@ -432,199 +540,7 @@
       },
       "targets": [
         {
-          "alias": "lookup ms",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "time",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "100_percentile"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "xor-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "lookup"
-            }
-          ]
-        },
-        {
-          "alias": "update ms",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "time",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "100_percentile"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "xor-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "update"
-            }
-          ]
-        }
-      ],
-      "title": "xor-service cache latency",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb_db"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": 20000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 10,
-        "y": 5
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "alias": "hits",
+          "alias": "evictions",
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb_db"
@@ -643,7 +559,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "count",
+          "measurement": "redis",
           "orderByTime": "ASC",
           "policy": "default",
           "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
@@ -654,7 +570,7 @@
             [
               {
                 "params": [
-                  "value"
+                  "evicted_keys"
                 ],
                 "type": "field"
               },
@@ -664,270 +580,10 @@
               }
             ]
           ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "root-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "hits"
-            }
-          ]
-        },
-        {
-          "alias": "mises",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "count",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "root-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "mises"
-            }
-          ]
+          "tags": []
         }
       ],
-      "title": "root-service cache hits",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb_db"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": 20000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 17,
-        "y": 5
-      },
-      "id": 6,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "alias": "hits",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "count",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "xor-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "hits"
-            }
-          ]
-        },
-        {
-          "alias": "mises",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "measurement": "count",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "xor-service"
-            },
-            {
-              "condition": "AND",
-              "key": "cache",
-              "operator": "=",
-              "value": "mises"
-            }
-          ]
-        }
-      ],
-      "title": "xor-service cache hits",
+      "title": "Redis Evictions",
       "type": "timeseries"
     },
     {
@@ -992,10 +648,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 10,
+        "h": 8,
+        "w": 8,
         "x": 0,
-        "y": 10
+        "y": 8
       },
       "id": 12,
       "options": {
@@ -1012,6 +668,7 @@
       },
       "targets": [
         {
+          "alias": "lookups",
           "datasource": {
             "type": "influxdb",
             "uid": "influxdb_db"
@@ -1036,7 +693,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "count",
+          "measurement": "lookup_count",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1054,6 +711,73 @@
                 "type": "mean"
               }
             ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "counter"
+            }
+          ]
+        },
+        {
+          "alias": "avg",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "endpoint"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "lookup_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              },
+              {
+                "params": [
+                  10
+                ],
+                "type": "moving_average"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "counter"
+            }
           ]
         }
       ],
@@ -1094,7 +818,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
+            "showPoints": "auto",
             "spanNulls": 20000,
             "stacking": {
               "group": "A",
@@ -1122,12 +846,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 10,
-        "y": 10
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
       },
-      "id": 8,
+      "id": 14,
       "options": {
         "legend": {
           "calcs": [],
@@ -1155,22 +879,14 @@
             },
             {
               "params": [
-                "method"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "linear"
+                "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "count",
+          "measurement": "miss_count",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
-          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1183,20 +899,73 @@
               },
               {
                 "params": [],
-                "type": "sum"
+                "type": "mean"
               }
             ]
           ],
           "tags": [
             {
-              "key": "application",
+              "key": "metric_type",
               "operator": "=",
-              "value": "root-service"
+              "value": "counter"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "miss_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              },
+              {
+                "params": [
+                  10
+                ],
+                "type": "moving_average"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "counter"
             }
           ]
         }
       ],
-      "title": "root-service method invocations",
+      "title": "Service cache Misses",
       "type": "timeseries"
     },
     {
@@ -1233,7 +1002,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
+            "showPoints": "auto",
             "spanNulls": 20000,
             "stacking": {
               "group": "A",
@@ -1261,12 +1030,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 17,
-        "y": 10
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 8
       },
-      "id": 9,
+      "id": 15,
       "options": {
         "legend": {
           "calcs": [],
@@ -1294,22 +1063,15 @@
             },
             {
               "params": [
-                "method"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "linear"
+                "null"
               ],
               "type": "fill"
             }
           ],
-          "measurement": "count",
+          "hide": true,
+          "measurement": "hit_count",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
-          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1322,316 +1084,283 @@
               },
               {
                 "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "counter"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "measurement": "lookup_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "counter"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "name": "Expression",
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$A/$B",
+          "hide": false,
+          "refId": "C",
+          "type": "math"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "measurement": "miss_count",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric_type",
+              "operator": "=",
+              "value": "counter"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "name": "Expression",
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$D/$B",
+          "hide": false,
+          "refId": "E",
+          "type": "math"
+        }
+      ],
+      "title": "Service cache Hit rates",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb_db"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": 20000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Hirtate",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb_db"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "linear"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "redis",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "keyspace_hitrate"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
                 "type": "sum"
               }
             ]
           ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "xor-service"
-            }
-          ]
+          "tags": []
         }
       ],
-      "title": "xor-service method invocations",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb_db"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": 20000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 10,
-        "y": 15
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "method"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "time",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "100_percentile"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "root-service"
-            }
-          ]
-        }
-      ],
-      "title": "root-service method latency",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb_db"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 5,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": 20000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 7,
-        "x": 17,
-        "y": 15
-      },
-      "id": 11,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb_db"
-          },
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "method"
-              ],
-              "type": "tag"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "time",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT sum(\"value\") FROM \"count\" WHERE (\"application\" = 'root-service' AND \"cache\" = 'hits') AND $timeFilter GROUP BY time($__interval) fill(linear)",
-          "rawQuery": false,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "100_percentile"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "application",
-              "operator": "=",
-              "value": "xor-service"
-            }
-          ]
-        }
-      ],
-      "title": "xor-service method latency",
+      "title": "Redis Hirtate",
       "type": "timeseries"
     }
   ],
-  "refresh": false,
-  "schemaVersion": 37,
+  "refresh": "5s",
+  "revision": 1,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Application Business Metrics",
   "uid": "hsal2-07",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

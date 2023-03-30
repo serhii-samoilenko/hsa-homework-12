@@ -3,6 +3,9 @@
 Index & Autocomplete
 ---
 
+Request failed: OOM command not allowed when used memory > 'maxmemory'.
+
+
 ## Test project setup
 
 The demo is written in Kotlin/Quarkus and uses docker-compose to run Elasticsearch.
